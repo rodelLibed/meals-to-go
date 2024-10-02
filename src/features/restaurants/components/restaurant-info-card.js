@@ -1,4 +1,5 @@
 import React from "react";
+import { View } from "react-native";
 import { Star, CircleX } from "lucide-react-native";
 import { Spacer } from "../../../components/spacer/spacer";
 import { Text } from "../../../components/typography/text-component";
@@ -13,6 +14,8 @@ import {
   Info,
 } from "./restaurant-info-styles";
 
+import { Favourite } from "../../../components/favourites/favourite-component";
+
 export const RestaurantInfoCard = ({ restaurant = {} }) => {
   const {
     name = "Some Restaurant",
@@ -24,19 +27,23 @@ export const RestaurantInfoCard = ({ restaurant = {} }) => {
     isOpenNow = true,
     rating = 4,
     isClosedTemporarily = true,
+    placeId,
   } = restaurant;
 
   const ratingArray = Array.from(new Array(Math.floor(rating)));
 
   return (
     <RestaurantCard elevation={5}>
-      <RestaurantCardCover key={name} source={{ uri: photos[0] }} />
+      <View>
+        <Favourite restaurant={restaurant} />
+        <RestaurantCardCover key={name} source={{ uri: photos[0] }} />
+      </View>
       <Info>
         <Text variant="label">{name}</Text>
         <Section>
           <Rating>
-            {ratingArray.map(() => (
-              <Star size={20} color="yellow" />
+            {ratingArray.map((_, i) => (
+              <Star key={`star-${placeId}-${i}`} size={20} color="yellow" />
             ))}
           </Rating>
           <SectionEnd>

@@ -1,40 +1,50 @@
-import { useState, createContext, useEffect, useMemo } from "react";
+import React, { useState, createContext, useEffect, useContext } from "react";
+
 import { restaurantsRequest, restaurantsTransform } from "./restaurant-service";
+import { LocationContext } from "../location/location-context";
 
-export const RestaurantContext = createContext();
+export const RestaurantsContext = createContext();
 
-export const RestaurantProvider = ({ children }) => {
+export const RestaurantsContextProvider = ({ children }) => {
   const [restaurants, setRestaurants] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setError] = useState(null);
+  const [error, setError] = useState(null);
+  const { location } = useContext(LocationContext);
+
+  const retrieveRestaurants = (loc) => {
+    setIsLoading(true);
+    setRestaurants([]);
+    setTimeout(() => {
+      restaurantsRequest(loc)
+        .then(restaurantsTransform)
+        .then((results) => {
+          setIsLoading(false);
+          setRestaurants(results);
+        })
+        .catch((err) => {
+          setIsLoading(false);
+          setError(err);
+        });
+    }, 2000);
+  };
 
   useEffect(() => {
-    const retrieveRestaurant = () => {
-      setIsLoading(true);
-      setTimeout(() => {
-        restaurantsRequest()
-          .then(restaurantsTransform)
-          .then((results) => {
-            setRestaurants(results);
-          })
-          .catch((err) => {
-            setError(err);
-          });
-      }, 2000);
-    };
-
-    retrieveRestaurant();
-  }, []);
+    if (location) {
+      console.log(location);
+      const locationString = `${location.lat},${location.lng}`;
+      retrieveRestaurants(locationString);
+    }
+  }, [location]);
 
   return (
-    <RestaurantContext.Provider
+    <RestaurantsContext.Provider
       value={{
         restaurants,
         isLoading,
-        isError,
+        error,
       }}
     >
       {children}
-    </RestaurantContext.Provider>
+    </RestaurantsContext.Provider>
   );
 };
